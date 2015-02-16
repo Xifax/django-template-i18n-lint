@@ -104,6 +104,11 @@ GOOD_STRINGS = re.compile(
 
          # another common template comment
         |{\#.*?\#}
+        
+         # Additional HTML properties
+        |<*required*>
+        |<*ng-cloak*>
+
         )""",
 
     # MULTILINE to match across lines and DOTALL to make . include the newline
@@ -162,19 +167,19 @@ def replace_strings(filename, overwrite=False, force=False, accept=[]):
                 full_text_lines.append(leading_whitespace)
 
                 # Find location of first letter
-                lineno, charpos = location(template, offset+m.span()[0])
+                lineno, charpos = location(content, offset+m.span()[0])
 
                 if any(r.match(message) for r in accept):
                     full_text_lines.append(message)
                 elif lineno in ignore_lines:
                     full_text_lines.append(message)
                 elif force:
-                    full_text_lines.append('{% trans "'+message.replace('"', '\\"')+'" %}')
+                    full_text_lines.append('{{ _("'+message.replace('"', '\\"')+'") }}')
                     
                 else:
-                    change = raw_input("Make %r translatable? [Y/n] " % message)                
+                    change = input("Make %r translatable? [Y/n] " % message)                
                     if change == 'y' or change == "":
-                        full_text_lines.append('{% trans "'+message.replace('"', '\\"')+'" %}')
+                        full_text_lines.append('{{ _("'+message.replace('"', '\\"')+'") }}')
                     else:
                         full_text_lines.append(message)
                         
